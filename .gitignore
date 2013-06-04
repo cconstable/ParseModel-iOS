@@ -16,3 +16,6 @@ profile
 *.moved-aside
 DerivedData
 .idea/
+ParseModel-iOS-Demo/Parse.framework/*
+ParseModel-iOS-Demo/Podfile.lock
+ParseModel-iOS-Demo/Pods/*
