@@ -205,7 +205,7 @@ static BOOL getPropertyInfo(Class cls,
     objc_property_t property = class_getProperty(cls, name);
     if (!property) {
         if (![propertyName hasPrefix: @"primitive"]) {   // Ignore "primitiveXXX" KVC accessors
-            NSLog(@"%@ has no dynamic property named '%@' -- failure likely", cls, propertyName);
+//            NSLog(@"%@ has no dynamic property named '%@' -- failure likely", cls, propertyName);
         }
         *propertyType = NULL;
         return NO;
@@ -379,14 +379,14 @@ static Class classFromType(const char* propertyType) {
     }
     
     if (accessor) {
-        NSLog(@"Creating dynamic accessor method -[%@ %s]", declaredInClass, selectorName);
+//        NSLog(@"Creating dynamic accessor method -[%@ %s]", declaredInClass, selectorName);
         class_addMethod(declaredInClass, sel, accessor, signature);
         return YES;
     }
     
     if (propertyType) {
-        NSLog(@"Dynamic property %@.%@ has type '%s' unsupported by %@",
-              self, key, propertyType, self);
+//        NSLog(@"Dynamic property %@.%@ has type '%s' unsupported by %@",
+//              self, key, propertyType, self);
     }
     return NO;
 }
