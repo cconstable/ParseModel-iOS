@@ -6,20 +6,21 @@
 //  Created by Christopher Constable on 6/3/13.
 //  Copyright (c) 2013 Futura IO. All rights reserved.
 //
-//  Original Code:
-//  Created by Jens Alfke on 8/26/11.
-//  Copyright (c) 2011 Couchbase, Inc. All rights reserved.
-//
 
 #import <Foundation/Foundation.h>
+#import "ParseModelBase.h"
 
 @class PFObject;
 
-@interface ParseModel : NSObject
-
-+ (NSString *)parseModelClass;
-+ (id)modelWithParseObject:(PFObject *)parseObject;
+@interface ParseModel : ParseModelBase
 
 @property (nonatomic, strong) PFObject *parseObject;
+
+/** This needs to be overriden if you are going to create new models. */
++ (NSString *)parseModelClass;
+
++ (id)parseModelWithParseObject:(PFObject *)parseObject;
+
+- (id)initWithParseObject:(PFObject *)parseObject;
 
 @end
