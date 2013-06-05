@@ -3,7 +3,7 @@ ParseModel-iOS
 
 Hassel-free data models for the Parse iOS SDK.
 
-The `ParseModel` class automatically maps the properties of your subclass to entries in an underlying `PFObject` and handles any neccesary conversions (e.g. if yuor property is an `int` it is converted to an `NSNumber` for storage).
+The `ParseModel` class automatically maps the properties of your subclass to entries in an underlying `PFObject` and handles any neccesary conversions (e.g. if your property is an `int` it is converted to an `NSNumber` for storage).
 
 ## Why ParseModel?
 
