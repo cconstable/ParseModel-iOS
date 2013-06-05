@@ -3,13 +3,15 @@ ParseModel-iOS
 
 Hassel-free data models for the Parse iOS SDK.
 
+The `ParseModel` class automatically maps the properties of your subclass to entries in an underlying `PFObject` and handles any neccesary conversions (e.g. if yuor property is an `int` it is converted to an `NSNumber` for storage).
+
 ## Why ParseModel?
 
 [Parse](https://parse.com/) is a cloud backend as-a-service (or BaaS) that allows developers to quickly get their apps up and running with little or no backend setup.
 
 More often than not, we developers like to work with out own classes and not use the out-of-the-box data models that come with many of these services. Regardless of our approach there comes a time when we need to map the properties of our objects to the backend object. Sometimes we accomplish this by overriding the getters and setters of our properties like this:
 
-```
+```obc-c
 @interface MyObject : NSObject
 
 @property (nonatomic, strong) NSString *someString;
@@ -31,11 +33,11 @@ More often than not, we developers like to work with out own classes and not use
 }
 
 @end
-```
+``` 
 
 The benefits to this approach is that we can define an Objective-C `protocol` to house these properties and have our model objects conform to this protocol:
 
-```
+```obc-c
 @interface MyObject : NSObject <MyObjectProtocol>
 @property (nonatomic, strong) PFObject *parseObject;
 @end
@@ -49,7 +51,7 @@ Now in our app code, we can just deal with `id<MyObjectProtocol>` pointers inste
 
 Setting up models like this, however, can be time consuming. Nobody likes typing out getters/setters, creating lots of static keys, etc. 
 
-This is where ParseModel comes in.
+*This is where ParseModel comes in.*
 
 
 ## What does ParseModel do?
@@ -61,7 +63,7 @@ Parse Model was based off an idea from [CouchCocoa](https://github.com/couchbase
 Here's an example:
 
 
-```
+```obc-c
 @interface MyObject : ParseModel
 
 @property (nonatomic, strong) NSString *someString;
@@ -85,30 +87,35 @@ Here's an example:
 
 Afer declaring the `MyObject` class above we can do things like this:
 
-```
-MyObject *myObject = [[MyObject alloc] init];
+```obc-c
+MyObject *myObject = [MyObject parseModel];
 myObject.someString = @"Hello there";
 [myObject.parseObject saveInBackground];
 ```
 
 When `someString` is set it is automatically mapped to the underlying `PFObject`.
 
-Lastly, you can created models with the following ParseModel method:
+Lastly, you can created models with existing the following method:
 
-```
+```obc-c
 + (id)modelWithParseObject:(PFObject *)parseObject;
 ```
 
+#### Using ParseModelUser
+
+A `PFUser` flavored object is also available called `ParseModelUser`.
+ 
 ## Installing
 
-I've created a [CocoaPods](http://cocoapods.org/) podspec here but some of the dependencies seem to be acting up at the moment. Seems like an small outage on Github's side. When I'm able to test I'll push the podspec to the specs repo. For now, just copy the files in the **ParseModel** folder into your project.
+I've created a [CocoaPods](http://cocoapods.org/) podspec. I'm currently submitting it to the official specs repo so if you are reading this just point your podfile here.
 
 ## Limitations
 
 ParseModel currently works with all types that `PFObject` [supports](https://parse.com/docs/ios_guide#objects-types/iOS). This means don't try using a UIImage and expect it to work! If you need to store UIImage data (or something that is unsupported) you have a few alternatives:
 
 1. Don't declare the `property` as `dynamic` and write your own code to handle that particular `property`.
-2. Use `PFFile`.
+2. Use `PFFile`'s for images.
+3. `PFGeoPoint`'s are not yet supported. (Would be easy to add…)
 3. Fork this repo and add support for serializing your object type to JSON :)
 
 ## How does this work?
