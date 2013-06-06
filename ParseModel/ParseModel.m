@@ -20,12 +20,12 @@
     return @"";
 }
 
-+ (id)parseModelWithParseObject:(PFObject *)parseObject
++ (instancetype)parseModelWithParseObject:(PFObject *)parseObject
 {
     return [[[self class] alloc] initWithParseObject:parseObject];
 }
 
-+ (id)parseModel
++ (instancetype)parseModel
 {
     return [[[self class] alloc] init];
 }

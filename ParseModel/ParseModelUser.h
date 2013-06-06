@@ -14,7 +14,7 @@
 
 @property (nonatomic, strong) PFUser *parseUser;
 
-+ (id)parseModelUserWithParseUser:(PFUser *)parseUser;
++ (instancetype)parseModelUserWithParseUser:(PFUser *)parseUser;
 
 - (id)initWithParseUser:(PFUser *)parseUser;
 

@@ -11,12 +11,12 @@
 
 @implementation ParseModelUser
 
-+ (id)parseModel
++ (instancetype)parseModel
 {
     return [[[self class] alloc] init];
 }
 
-+ (id)parseModelUserWithParseUser:(PFUser *)parseUser
++ (instancetype)parseModelUserWithParseUser:(PFUser *)parseUser
 {
     return [[[self class] alloc] initWithParseUser:parseUser];
 }

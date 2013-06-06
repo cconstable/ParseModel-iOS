@@ -28,7 +28,7 @@
 
 @implementation ParseModelBase
 
-+ (id)parseModel
++ (instancetype)parseModel
 {
     return nil;
 }

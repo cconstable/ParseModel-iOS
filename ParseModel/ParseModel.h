@@ -19,7 +19,7 @@
 /** This needs to be overriden if you are going to create new models. */
 + (NSString *)parseModelClass;
 
-+ (id)parseModelWithParseObject:(PFObject *)parseObject;
++ (instancetype)parseModelWithParseObject:(PFObject *)parseObject;
 
 - (id)initWithParseObject:(PFObject *)parseObject;
 

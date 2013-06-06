@@ -17,6 +17,6 @@
 
 @interface ParseModelBase : NSObject
 
-+ (id)parseModel;
++ (instancetype)parseModel;
 
 @end
