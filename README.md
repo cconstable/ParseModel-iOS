@@ -5,6 +5,10 @@ Hassel-free data models for the Parse iOS SDK.
 
 The `ParseModel` class automatically maps the properties of your subclass to entries in an underlying `PFObject` and handles any neccesary conversions (e.g. if your property is an `int` it is converted to an `NSNumber` for storage).
 
+#### Installation
+
+via [CocoaPods](http://cocoapods.org/): `pod 'ParseModel'`
+
 ## Why ParseModel?
 
 [Parse](https://parse.com/) is a cloud backend as-a-service (or BaaS) that allows developers to quickly get their apps up and running with little or no backend setup.
@@ -105,10 +109,6 @@ Lastly, you can created models with existing the following method:
 
 A `PFUser` flavored object is also available called `ParseModelUser`.
  
-## Installing
-
-I've created a [CocoaPods](http://cocoapods.org/) podspec. I'm currently submitting it to the official specs repo so if you are reading this just point your podfile here.
-
 ## Limitations
 
 ParseModel currently works with all types that `PFObject` [supports](https://parse.com/docs/ios_guide#objects-types/iOS). This means don't try using a UIImage and expect it to work! If you need to store UIImage data (or something that is unsupported) you have a few alternatives:
