@@ -9,6 +9,10 @@ The `ParseModel` class automatically maps the properties of your subclass to ent
 
 via [CocoaPods](http://cocoapods.org/): `pod 'ParseModel'`
 
+#### NOTE
+
+The Parse iOS SDK, as of March 2013, has this functionality built in. Check out this [blog post](http://blog.parse.com/2013/03/22/stay-classy-objective-c-introducing-native-subclasses-for-parse-objects/) for more info. Regardless, this repo has been helpful for me and I will continute to add features to it if they are not found in the native Parse iOS SDK.
+
 ## Why ParseModel?
 
 [Parse](https://parse.com/) is a cloud backend as-a-service (or BaaS) that allows developers to quickly get their apps up and running with little or no backend setup.
