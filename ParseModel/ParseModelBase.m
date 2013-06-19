@@ -162,7 +162,7 @@ static BOOL getPropertyInfo(Class cls,
     objc_property_t property = class_getProperty(cls, name);
     if (!property) {
         if (![propertyName hasPrefix: @"primitive"]) {   // Ignore "primitiveXXX" KVC accessors
-//            NSLog(@"%@ has no dynamic property named '%@' -- failure likely", cls, propertyName);
+            NSLog(@"%@ has no dynamic property named '%@' -- failure likely", cls, propertyName);
         }
         *propertyType = NULL;
         return NO;
@@ -266,6 +266,10 @@ static Class classFromType(const char* propertyType) {
             return imp_implementationWithBlock(^double(ParseModelBase* receiver) {
                 return [[receiver getValueOfProperty: property] doubleValue];
             });
+        case _C_FLT:
+            return imp_implementationWithBlock(^double(ParseModelBase* receiver) {
+                return [[receiver getValueOfProperty: property] floatValue];
+            });
         default:
             // TODO: handle more scalar property types.
             return NULL;
@@ -291,6 +295,10 @@ static Class classFromType(const char* propertyType) {
         case _C_DBL:
             return imp_implementationWithBlock(^(ParseModelBase* receiver, double value) {
                 setIdProperty(receiver, property, [NSNumber numberWithDouble: value]);
+            });
+        case _C_FLT:
+            return imp_implementationWithBlock(^(ParseModelBase* receiver, float value) {
+                setIdProperty(receiver, property, [NSNumber numberWithFloat:value]);
             });
         default:
             // TODO: handle more scalar property types.
@@ -338,8 +346,8 @@ static Class classFromType(const char* propertyType) {
     }
     
     if (propertyType) {
-//        NSLog(@"Dynamic property %@.%@ has type '%s' unsupported by %@",
-//              self, key, propertyType, self);
+        NSLog(@"Dynamic property %@.%@ has type '%s' unsupported by %@",
+              self, key, propertyType, self);
     }
     return NO;
 }
