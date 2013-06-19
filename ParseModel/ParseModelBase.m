@@ -89,54 +89,11 @@ NS_INLINE NSString *setterKey(SEL sel) {
 
 #pragma mark - GENERIC ACCESSOR METHOD IMPS:
 
-
-#if USE_BLOCKS
-
 static inline void setIdProperty(ParseModelBase *self, NSString* property, id value) {
     // TODO: Add support for UIImage
     BOOL result = [self setValue: value ofProperty: property];
     NSCAssert(result, @"Property %@.%@ is not settable", [self class], property);
 }
-
-#else
-
-static id getIdProperty(CouchDynamicObject *self, SEL _cmd) {
-    return [self getValueOfProperty: getterKey(_cmd)];
-}
-
-static void setIdProperty(CouchDynamicObject *self, SEL _cmd, id value) {
-    NSString* property = setterKey(_cmd);
-    BOOL result = [self setValue: value ofProperty: property];
-    NSCAssert(result, @"Property %@.%@ is not settable", [self class], property);
-}
-
-static int getIntProperty(CouchDynamicObject *self, SEL _cmd) {
-    return [getIdProperty(self,_cmd) intValue];
-}
-
-static void setIntProperty(CouchDynamicObject *self, SEL _cmd, int value) {
-    setIdProperty(self, _cmd, [NSNumber numberWithInt:value]);
-}
-
-static bool getBoolProperty(CouchDynamicObject *self, SEL _cmd) {
-    return [getIdProperty(self,_cmd) boolValue];
-}
-
-static void setBoolProperty(CouchDynamicObject *self, SEL _cmd, bool value) {
-    setIdProperty(self, _cmd, [NSNumber numberWithBool:value]);
-}
-
-static double getDoubleProperty(CouchDynamicObject *self, SEL _cmd) {
-    id number = getIdProperty(self,_cmd);
-    return number ?[number doubleValue] :0.0;
-}
-
-static void setDoubleProperty(CouchDynamicObject *self, SEL _cmd, double value) {
-    setIdProperty(self, _cmd, [NSNumber numberWithDouble:value]);
-}
-
-#endif // USE_BLOCKS
-
 
 #pragma mark - PROPERTY INTROSPECTION:
 
@@ -247,67 +204,75 @@ static Class classFromType(const char* propertyType) {
     return classFromType(propertyType);
 }
 
++ (id)performBoxingIfNecessary:(id)object
+{
+    id boxedObject = object;
+    if ([object isKindOfClass:[CLLocation class]]) {
+        boxedObject = [PFGeoPoint geoPointWithLocation:object];
+    }
+    else if([object isKindOfClass:[NSURL class]]) {
+        boxedObject = [(NSURL *)object absoluteString];
+    }
+    
+    return boxedObject;
+}
 
-+ (IMP) impForGetterOfProperty: (NSString*)property ofClass: (Class)propertyClass {
-#if USE_BLOCKS
++ (id)performUnboxingIfNecessary:(id)object targetClass:(Class)targetClass
+{
+    id unboxedObject = object;
+    if ((targetClass == [CLLocation class]) && [object isKindOfClass:[PFGeoPoint class]]) {
+        unboxedObject = [[CLLocation alloc] initWithLatitude:[(PFGeoPoint *)object latitude] longitude:[(PFGeoPoint *)object longitude]];
+    }
+    else if((targetClass == [NSURL class]) && [object isKindOfClass:[NSString class]]) {
+        unboxedObject = [NSURL URLWithString:object];
+    }
+    
+    return unboxedObject;
+}
+
++ (IMP)impForGetterOfProperty:(NSString *)property ofClass:(Class)propertyClass {
     return imp_implementationWithBlock(^id(ParseModelBase* receiver) {
-        return [receiver getValueOfProperty: property];
+        id object = [receiver getValueOfProperty:property];
+        object = [ParseModelBase performUnboxingIfNecessary:object targetClass:propertyClass];
+        return object;
     });
-#else
-    return (IMP)getIdProperty;
-#endif
 }
 
-+ (IMP) impForSetterOfProperty: (NSString*)property ofClass: (Class)propertyClass {
-#if USE_BLOCKS
++ (IMP)impForSetterOfProperty:(NSString *)property ofClass:(Class)propertyClass {
     return imp_implementationWithBlock(^(ParseModelBase* receiver, id value) {
-        setIdProperty(receiver, property, value);
+        id boxedValue = [ParseModelBase performBoxingIfNecessary:value];
+        setIdProperty(receiver, property, boxedValue);
     });
-#else
-    return (IMP)setIdProperty;
-#endif
 }
 
 
-+ (IMP) impForGetterOfProperty: (NSString*)property ofType: (const char*)propertyType {
++ (IMP)impForGetterOfProperty:(NSString*)property ofType:(const char *)propertyType {
     switch (propertyType[0]) {
         case _C_ID:
-            return [self impForGetterOfProperty: property ofClass: classFromType(propertyType)];
+            return [self impForGetterOfProperty:property ofClass:classFromType(propertyType)];
         case _C_INT:
         case _C_SHT:
         case _C_USHT:
         case _C_CHR:
         case _C_UCHR:
-#if USE_BLOCKS
             return imp_implementationWithBlock(^int(ParseModelBase* receiver) {
                 return [[receiver getValueOfProperty: property] intValue];
             });
-#else
-            return (IMP)getIntProperty;
-#endif
         case _C_BOOL:
-#if USE_BLOCKS
             return imp_implementationWithBlock(^bool(ParseModelBase* receiver) {
                 return [[receiver getValueOfProperty: property] boolValue];
             });
-#else
-            return (IMP)getBoolProperty;
-#endif
         case _C_DBL:
-#if USE_BLOCKS
             return imp_implementationWithBlock(^double(ParseModelBase* receiver) {
                 return [[receiver getValueOfProperty: property] doubleValue];
             });
-#else
-            return (IMP)getDoubleProperty;
-#endif
         default:
             // TODO: handle more scalar property types.
             return NULL;
     }
 }
 
-+ (IMP) impForSetterOfProperty: (NSString*)property ofType: (const char*)propertyType {
++ (IMP)impForSetterOfProperty:(NSString*)property ofType:(const char *)propertyType {
     switch (propertyType[0]) {
         case _C_ID:
             return [self impForSetterOfProperty: property ofClass: classFromType(propertyType)];
@@ -316,29 +281,17 @@ static Class classFromType(const char* propertyType) {
         case _C_USHT:
         case _C_CHR:            // Note that "BOOL" is a typedef so it compiles to 'char'
         case _C_UCHR:
-#if USE_BLOCKS
             return imp_implementationWithBlock(^(ParseModelBase* receiver, int value) {
                 setIdProperty(receiver, property, [NSNumber numberWithInt: value]);
             });
-#else
-            return (IMP)setIntProperty;
-#endif
         case _C_BOOL:           // This is the true native C99/C++ "bool" type
-#if USE_BLOCKS
             return imp_implementationWithBlock(^(ParseModelBase* receiver, bool value) {
                 setIdProperty(receiver, property, [NSNumber numberWithBool: value]);
             });
-#else
-            return (IMP)setBoolProperty;
-#endif
         case _C_DBL:
-#if USE_BLOCKS
             return imp_implementationWithBlock(^(ParseModelBase* receiver, double value) {
                 setIdProperty(receiver, property, [NSNumber numberWithDouble: value]);
             });
-#else
-            return (IMP)setDoubleProperty;
-#endif
         default:
             // TODO: handle more scalar property types.
             return NULL;

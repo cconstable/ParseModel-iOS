@@ -27,8 +27,14 @@
     // Create a new object and save it to our Parse account.
     TestObject *testObject = [TestObject parseModel];
     testObject.someString = @"Hello there";
+    testObject.someUrl = [NSURL URLWithString:@"http://parse.com"];
     testObject.anInteger = 1255389;
     testObject.aDate = [NSDate date];
+    testObject.location = [[CLLocation alloc] initWithLatitude:24.0 longitude:-80.0];
+    
+    // Try getting back values we've stored...
+    NSURL *url = testObject.someUrl;
+    NSLog(@"Got url: %@", [url absoluteString]);
     
     // The underlying parse objects are exposed so you can save
     // however you'd like.

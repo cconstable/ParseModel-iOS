@@ -52,7 +52,7 @@
 
 - (id)getValueOfProperty:(NSString *)property
 {
-    return [self.parseObject objectForKey: property];
+    return [self.parseObject objectForKey:property];
 }
 
 - (BOOL)setValue:(id)value ofProperty:(NSString *)property

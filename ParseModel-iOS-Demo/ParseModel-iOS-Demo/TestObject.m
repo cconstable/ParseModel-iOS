@@ -14,8 +14,10 @@
 // PFObject as dynamic!
 @dynamic someString;
 @dynamic someOtherString;
+@dynamic someUrl;
 @dynamic anInteger;
 @dynamic aDate;
+@dynamic location;
 
 // When you "init" your object, this string is used to initialize
 // the PFObject.
