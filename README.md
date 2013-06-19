@@ -117,11 +117,6 @@ A `PFUser` flavored object is also available called `ParseModelUser`.
 
 ParseModel currently works with all types that `PFObject` [supports](https://parse.com/docs/ios_guide#objects-types/iOS). This means don't try using a UIImage and expect it to work! If you need to store UIImage data (or something that is unsupported) you have a few alternatives:
 
-1. Don't declare the `property` as `dynamic` and write your own code to handle that particular `property`.
-2. Use `PFFile`'s for images.
-3. `PFGeoPoint`'s are not yet supported. (Would be easy to add…)
-3. Fork this repo and add support for serializing your object type to JSON :)
-
 ## How does this work?
 
 First off, let me say that this probably wouldn't have happened if it wasn't for [Jens Alfke](https://github.com/snej). He wrote almost all of this code. I simply adapted it for Parse. Most of the code was pulled from his CouchModel class.
