@@ -10,6 +10,7 @@
 #import <Parse/Parse.h>
 #import "ParseModel.h"
 #import "ParseModelUser.h"
+#import "ParseModelUtils.h"
 
 @implementation ParseModel
 
@@ -29,6 +30,12 @@
 + (instancetype)parseModel
 {
     return [[[self class] alloc] init];
+}
+
++ (void)registerParseModel
+{
+    [[[ParseModelUtils sharedUtilities] registeredParseModels] setObject:[self parseModelClass]
+                                                                  forKey:NSStringFromClass([self class])];
 }
 
 - (id)init

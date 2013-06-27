@@ -52,16 +52,15 @@
 
 - (id)performBoxingIfNecessary:(id)object
 {
-    return [ParseModelUtils performBoxingIfNecessary:object];
+    return [[ParseModelUtils sharedUtilities] performBoxingIfNecessary:object];
 }
 
 - (id)performUnboxingIfNecessary:(id)object targetClass:(Class)targetClass
 {
-    return [ParseModelUtils performUnboxingIfNecessary:object targetClass:targetClass];
+    return [[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:object targetClass:targetClass];
 }
 
 #pragma mark - SELECTOR-TO-PROPERTY NAME MAPPING:
-
 
 NS_INLINE BOOL isGetter(const char* name) {
     if (!name[0] || name[0]=='_' || name[strlen(name)-1] == ':')
@@ -96,8 +95,6 @@ NS_INLINE NSString *setterKey(SEL sel) {
 + (NSString*) getterKey: (SEL)sel   {return getterKey(sel);}
 + (NSString*) setterKey: (SEL)sel   {return setterKey(sel);}
 
-
-
 #pragma mark - GENERIC ACCESSOR METHOD IMPS:
 
 static inline void setIdProperty(ParseModelBase *self, NSString* property, id value) {
@@ -106,7 +103,6 @@ static inline void setIdProperty(ParseModelBase *self, NSString* property, id va
 }
 
 #pragma mark - PROPERTY INTROSPECTION:
-
 
 + (NSSet*) propertyNames {
     static NSMutableDictionary* classToNames;
@@ -160,7 +156,6 @@ static const char* getPropertyType(objc_property_t property, BOOL *outIsSettable
     return result;
 }
 
-
 // Look up a class's property by name, and find its type and which class declared it
 static BOOL getPropertyInfo(Class cls,
                             NSString *propertyName,
@@ -195,7 +190,6 @@ static BOOL getPropertyInfo(Class cls,
     return YES;
 }
 
-
 static Class classFromType(const char* propertyType) {
     size_t len = strlen(propertyType);
     if (propertyType[0] != _C_ID || propertyType[1] != '"' || propertyType[len-1] != '"')
@@ -204,7 +198,6 @@ static Class classFromType(const char* propertyType) {
     strlcpy(className, propertyType + 2, len - 2);
     return objc_getClass(className);
 }
-
 
 + (Class) classOfProperty: (NSString*)propertyName {
     Class declaredInClass;
@@ -228,7 +221,6 @@ static Class classFromType(const char* propertyType) {
         setIdProperty(receiver, property, boxedValue);
     });
 }
-
 
 + (IMP)impForGetterOfProperty:(NSString*)property ofType:(const char *)propertyType {
     switch (propertyType[0]) {
@@ -322,9 +314,9 @@ static Class classFromType(const char* propertyType) {
     else {
         return NO;
     }
-    
+
+    // Create dynamic property method
     if (accessor) {
-//        NSLog(@"Creating dynamic accessor method -[%@ %s]", declaredInClass, selectorName);
         class_addMethod(declaredInClass, sel, accessor, signature);
         return YES;
     }
