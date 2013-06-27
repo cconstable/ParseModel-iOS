@@ -9,6 +9,7 @@
 
 #import <Parse/Parse.h>
 #import "ParseModel.h"
+#import "ParseModelUser.h"
 
 @implementation ParseModel
 

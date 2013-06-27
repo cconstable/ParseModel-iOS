@@ -48,6 +48,7 @@
         if (succeeded) {
             testUser.userFullName = @"Some Parse User";
             testUser.userAge = 25;
+            testUser.someObject = testObject;
             [testUser.parseUser saveInBackground];
         }
     }];

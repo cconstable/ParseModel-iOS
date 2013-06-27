@@ -29,6 +29,7 @@
 		740F5DD6175CE49600954D7A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 740F5DCD175CE49600954D7A /* SystemConfiguration.framework */; };
 		740F5DD9175CE4C100954D7A /* TestObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 740F5DD8175CE4C100954D7A /* TestObject.m */; };
 		740F5DDD175CE4EA00954D7A /* ParseModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 740F5DDC175CE4EA00954D7A /* ParseModel.m */; };
+		74132406177BA13A000C85D0 /* ParseModelUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 74132405177BA13A000C85D0 /* ParseModelUtils.m */; };
 		74ED584E175EBCCF0045333A /* ParseModelBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 74ED584D175EBCCF0045333A /* ParseModelBase.m */; };
 		74ED5851175EC0E60045333A /* ParseModelUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 74ED5850175EC0E60045333A /* ParseModelUser.m */; };
 		74ED5854175EC2720045333A /* TestUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 74ED5853175EC2720045333A /* TestUser.m */; };
@@ -63,6 +64,8 @@
 		740F5DD8175CE4C100954D7A /* TestObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestObject.m; sourceTree = "<group>"; };
 		740F5DDB175CE4EA00954D7A /* ParseModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseModel.h; sourceTree = "<group>"; };
 		740F5DDC175CE4EA00954D7A /* ParseModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseModel.m; sourceTree = "<group>"; };
+		74132404177BA13A000C85D0 /* ParseModelUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseModelUtils.h; sourceTree = "<group>"; };
+		74132405177BA13A000C85D0 /* ParseModelUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseModelUtils.m; sourceTree = "<group>"; };
 		74ED584C175EBCCF0045333A /* ParseModelBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseModelBase.h; sourceTree = "<group>"; };
 		74ED584D175EBCCF0045333A /* ParseModelBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseModelBase.m; sourceTree = "<group>"; };
 		74ED584F175EC0E60045333A /* ParseModelUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseModelUser.h; sourceTree = "<group>"; };
@@ -167,6 +170,8 @@
 		740F5DDA175CE4EA00954D7A /* ParseModel */ = {
 			isa = PBXGroup;
 			children = (
+				74132404177BA13A000C85D0 /* ParseModelUtils.h */,
+				74132405177BA13A000C85D0 /* ParseModelUtils.m */,
 				740F5DDB175CE4EA00954D7A /* ParseModel.h */,
 				740F5DDC175CE4EA00954D7A /* ParseModel.m */,
 				74ED584F175EC0E60045333A /* ParseModelUser.h */,
@@ -278,6 +283,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				740F5DAD175CE45600954D7A /* main.m in Sources */,
+				74132406177BA13A000C85D0 /* ParseModelUtils.m in Sources */,
 				740F5DB1175CE45600954D7A /* AppDelegate.m in Sources */,
 				740F5DD9175CE4C100954D7A /* TestObject.m in Sources */,
 				740F5DDD175CE4EA00954D7A /* ParseModel.m in Sources */,

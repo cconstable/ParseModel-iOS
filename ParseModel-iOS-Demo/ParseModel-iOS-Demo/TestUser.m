@@ -14,5 +14,6 @@
 // PFUser as dynamic!
 @dynamic userFullName;
 @dynamic userAge;
+@dynamic someObject;
 
 @end

@@ -19,4 +19,8 @@
 
 + (instancetype)parseModel;
 
+// Override these methods to perform additional boxing/unboxing.
+- (id)performBoxingIfNecessary:(id)object;
+- (id)performUnboxingIfNecessary:(id)object targetClass:(Class)targetClass;
+
 @end

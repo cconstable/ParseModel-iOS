@@ -17,6 +17,7 @@
 
 #import <Parse/Parse.h>
 #import "ParseModelBase.h"
+#import "ParseModelUtils.h"
 
 #import <objc/runtime.h>
 
@@ -47,6 +48,16 @@
     // Override.
     
     return NO;
+}
+
+- (id)performBoxingIfNecessary:(id)object
+{
+    return [ParseModelUtils performBoxingIfNecessary:object];
+}
+
+- (id)performUnboxingIfNecessary:(id)object targetClass:(Class)targetClass
+{
+    return [ParseModelUtils performUnboxingIfNecessary:object targetClass:targetClass];
 }
 
 #pragma mark - SELECTOR-TO-PROPERTY NAME MAPPING:
@@ -90,7 +101,6 @@ NS_INLINE NSString *setterKey(SEL sel) {
 #pragma mark - GENERIC ACCESSOR METHOD IMPS:
 
 static inline void setIdProperty(ParseModelBase *self, NSString* property, id value) {
-    // TODO: Add support for UIImage
     BOOL result = [self setValue: value ofProperty: property];
     NSCAssert(result, @"Property %@.%@ is not settable", [self class], property);
 }
@@ -204,43 +214,17 @@ static Class classFromType(const char* propertyType) {
     return classFromType(propertyType);
 }
 
-+ (id)performBoxingIfNecessary:(id)object
-{
-    id boxedObject = object;
-    if ([object isKindOfClass:[CLLocation class]]) {
-        boxedObject = [PFGeoPoint geoPointWithLocation:object];
-    }
-    else if([object isKindOfClass:[NSURL class]]) {
-        boxedObject = [(NSURL *)object absoluteString];
-    }
-    
-    return boxedObject;
-}
-
-+ (id)performUnboxingIfNecessary:(id)object targetClass:(Class)targetClass
-{
-    id unboxedObject = object;
-    if ((targetClass == [CLLocation class]) && [object isKindOfClass:[PFGeoPoint class]]) {
-        unboxedObject = [[CLLocation alloc] initWithLatitude:[(PFGeoPoint *)object latitude] longitude:[(PFGeoPoint *)object longitude]];
-    }
-    else if((targetClass == [NSURL class]) && [object isKindOfClass:[NSString class]]) {
-        unboxedObject = [NSURL URLWithString:object];
-    }
-    
-    return unboxedObject;
-}
-
 + (IMP)impForGetterOfProperty:(NSString *)property ofClass:(Class)propertyClass {
     return imp_implementationWithBlock(^id(ParseModelBase* receiver) {
         id object = [receiver getValueOfProperty:property];
-        object = [ParseModelBase performUnboxingIfNecessary:object targetClass:propertyClass];
+        object = [receiver performUnboxingIfNecessary:object targetClass:propertyClass];
         return object;
     });
 }
 
 + (IMP)impForSetterOfProperty:(NSString *)property ofClass:(Class)propertyClass {
     return imp_implementationWithBlock(^(ParseModelBase* receiver, id value) {
-        id boxedValue = [ParseModelBase performBoxingIfNecessary:value];
+        id boxedValue = [receiver performBoxingIfNecessary:value];
         setIdProperty(receiver, property, boxedValue);
     });
 }
