@@ -34,8 +34,7 @@
 
 + (void)registerParseModel
 {
-    [[[ParseModelUtils sharedUtilities] registeredParseModels] setObject:[self parseModelClass]
-                                                                  forKey:NSStringFromClass([self class])];
+    [[ParseModelUtils sharedUtilities] registerParseModel:self];
 }
 
 - (id)init

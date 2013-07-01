@@ -12,6 +12,10 @@
 #import "ParseModel.h"
 #import "ParseModelUser.h"
 
+@interface ParseModelUtils ()
+@property (nonatomic, strong) NSMutableDictionary *registeredParseModels;
+@end
+
 @implementation ParseModelUtils
 
 + (instancetype)sharedUtilities
@@ -26,6 +30,24 @@
     }
     
     return parseModelUtils;
+}
+
+- (BOOL)registerParseModel:(Class)parseModelClass
+{
+    // Get out of there cat! You are not a ParseModel.
+    // http://getoutoftherecat.tumblr.com/
+    if ([parseModelClass isSubclassOfClass:[ParseModel class]] == NO) {
+        return NO;
+    }
+    
+    if (!self.registeredParseModels) {
+        self.registeredParseModels = [[NSMutableDictionary alloc] init];
+    }
+    
+    [self.registeredParseModels setObject:NSStringFromClass(parseModelClass)
+                                   forKey:[parseModelClass parseModelClass]];
+    
+    return YES;
 }
 
 - (id)performBoxingIfNecessary:(id)object
@@ -87,26 +109,47 @@
     
     // Let's get recursive
     // Handle arrays and dictionaries...
-    else if ([targetClass isKindOfClass:[NSArray class]]) {
+    else if ([object isKindOfClass:[NSArray class]]) {
         NSMutableArray *unboxedArray = [NSMutableArray array];
         for (id interalObject in object) {
-            [unboxedArray addObject:[[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:object targetClass:targetClass]];
+            [unboxedArray addObject:[[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:interalObject
+                                                                                      targetClass:[self resolveModelClassForObject:interalObject]]];
         }
         unboxedObject = unboxedArray;
     }
-    else if ([targetClass isKindOfClass:[NSDictionary class]]) {
+    else if ([object isKindOfClass:[NSDictionary class]]) {
         NSMutableDictionary *unboxedDictionary = [NSMutableDictionary dictionary];
         NSArray *keys = [object allKeys];
         for (id key in keys) {
-            id unboxedKey = [[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:key targetClass:[key class]];
-            id unboxedValue = [[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:[object objectForKey:key]
-                                                            targetClass:[[object objectForKey:key] class]];
+            id unboxedKey = [[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:key targetClass:[self resolveModelClassForObject:key]];
+            id rawValue = [object objectForKey:key];
+            id unboxedValue = [[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:rawValue
+                                                                                targetClass:[self resolveModelClassForObject:rawValue]];
             [unboxedDictionary setObject:unboxedValue forKey:unboxedKey];
         }
         unboxedObject = unboxedDictionary;
     }
     
+    // Lastly, if this class is a PFObject and it is registered, instantiate the appropriate ParseModel...
+    else if ([object isKindOfClass:[PFObject class]]) {
+        NSString *unboxedClassString = [self.registeredParseModels objectForKey:[(PFObject *)object parseClassName]];
+        if (unboxedClassString.length) {
+            unboxedObject = [[NSClassFromString(unboxedClassString) alloc] initWithParseObject:object];
+        }
+    }
+    
     return unboxedObject;
+}
+
+- (Class)resolveModelClassForObject:(id)object
+{
+    if ([object isKindOfClass:[PFObject class]]) {
+        NSString *classString = [self.registeredParseModels objectForKey:[(PFObject *)object parseClassName]];
+        return NSClassFromString(classString);
+    }
+    else {
+        return [object class];
+    }
 }
 
 @end

@@ -165,6 +165,7 @@ static BOOL getPropertyInfo(Class cls,
     // Find the property declaration:
     const char *name = [propertyName UTF8String];
     objc_property_t property = class_getProperty(cls, name);
+    
     if (!property) {
         if (![propertyName hasPrefix: @"primitive"]) {   // Ignore "primitiveXXX" KVC accessors
             NSLog(@"%@ has no dynamic property named '%@' -- failure likely", cls, propertyName);
@@ -178,7 +179,7 @@ static BOOL getPropertyInfo(Class cls,
         *declaredInClass = cls;
         cls = class_getSuperclass(cls);
     } while (class_getProperty(cls, name) == property);
-    
+        
     // Get the property's type:
     BOOL isSettable;
     *propertyType = getPropertyType(property, &isSettable);
