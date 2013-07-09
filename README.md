@@ -11,7 +11,7 @@ via [CocoaPods](http://cocoapods.org/): `pod 'ParseModel'`
 
 #### NOTE
 
-The Parse iOS SDK, as of March 2013, has this functionality built in. Check out this [blog post](http://blog.parse.com/2013/03/22/stay-classy-objective-c-introducing-native-subclasses-for-parse-objects/) for more info. Regardless, this repo has been helpful for me and I will continute to add features to it if they are not found in the native Parse iOS SDK.
+Although the Parse iOS SDK has this functionality [built in](http://blog.parse.com/2013/03/22/stay-classy-objective-c-introducing-native-subclasses-for-parse-objects/), this library acts as an alternative method to subclassing `PFObject` directly. As far as I'm aware, ParseModel handles everything that the native SDK does with the addition of being able to use this technique with `PFUser` objects and with the exception of handling relationships (it's easy enough to write a simple getter method to handle a relationship but it would be nice if someone contributed that piece).
 
 ## Why ParseModel?
 
