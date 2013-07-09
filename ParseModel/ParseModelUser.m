@@ -21,21 +21,21 @@
     return [[[self class] alloc] initWithParseUser:parseUser];
 }
 
-- (id)initWithParseUser:(PFUser *)parseUser
-{
-    self = [super init];
-    if (self) {
-        self.parseUser = parseUser;
-    }
-    
-    return self;
-}
-
 - (id)init
 {
     self = [super init];
     if (self) {
         self.parseUser = [PFUser user];
+    }
+    
+    return self;
+}
+
+- (id)initWithParseUser:(PFUser *)parseUser
+{
+    self = [super init];
+    if (self) {
+        self.parseUser = parseUser;
     }
     
     return self;

@@ -60,6 +60,53 @@
     return [[ParseModelUtils sharedUtilities] performUnboxingIfNecessary:object targetClass:targetClass];
 }
 
++ (BOOL)resolveInstanceMethod:(SEL)selector
+{
+    const char *selectorName = sel_getName(selector);
+    NSString* key;
+    Class declaredInClass;
+    const char *propertyType;
+    char signature[5];
+    IMP accessor = NULL;
+    
+    // Is this selector a setter? (e.g. setValue:)
+    if (isSetter(selectorName)) {
+        key = setterKey(selector);
+        if (getPropertyInfo(self, key, YES, &declaredInClass, &propertyType)) {
+            strcpy(signature, "v@: ");
+            signature[3] = propertyType[0];
+            accessor = [self impForSetterOfProperty: key ofType: propertyType];
+        }
+    }
+    
+    // Is this selector a getter? (e.g. value)
+    else if (isGetter(selectorName)) {
+        key = getterKey(selector);
+        if (getPropertyInfo(self, key, NO, &declaredInClass, &propertyType)) {
+            strcpy(signature, " @:");
+            signature[0] = propertyType[0];
+            accessor = [self impForGetterOfProperty: key ofType: propertyType];
+        }
+    }
+    
+    // Neither setter nor getter... just return.
+    else {
+        return NO;
+    }
+    
+    // Create dynamic property method
+    if (accessor) {
+        class_addMethod(declaredInClass, selector, accessor, signature);
+        return YES;
+    }
+    
+    if (propertyType) {
+        NSLog(@"Dynamic property %@.%@ has type '%s' unsupported by %@",
+              self, key, propertyType, self);
+    }
+    return NO;
+}
+
 #pragma mark - SELECTOR-TO-PROPERTY NAME MAPPING:
 
 NS_INLINE BOOL isGetter(const char* name) {
@@ -281,52 +328,6 @@ static Class classFromType(const char* propertyType) {
             // TODO: handle more scalar property types.
             return NULL;
     }
-}
-
-+ (BOOL)resolveInstanceMethod:(SEL)sel {
-    const char *selectorName = sel_getName(sel);
-    NSString* key;
-    Class declaredInClass;
-    const char *propertyType;
-    char signature[5];
-    IMP accessor = NULL;
-    
-    // Is this selector a setter? (e.g. setValue:)
-    if (isSetter(selectorName)) {
-        key = setterKey(sel);
-        if (getPropertyInfo(self, key, YES, &declaredInClass, &propertyType)) {
-            strcpy(signature, "v@: ");
-            signature[3] = propertyType[0];
-            accessor = [self impForSetterOfProperty: key ofType: propertyType];
-        }
-    }
-    
-    // Is this selector a getter? (e.g. value)
-    else if (isGetter(selectorName)) {
-        key = getterKey(sel);
-        if (getPropertyInfo(self, key, NO, &declaredInClass, &propertyType)) {
-            strcpy(signature, " @:");
-            signature[0] = propertyType[0];
-            accessor = [self impForGetterOfProperty: key ofType: propertyType];
-        }
-    }
-    
-    // Neither setter nor getter... just return.
-    else {
-        return NO;
-    }
-
-    // Create dynamic property method
-    if (accessor) {
-        class_addMethod(declaredInClass, sel, accessor, signature);
-        return YES;
-    }
-    
-    if (propertyType) {
-        NSLog(@"Dynamic property %@.%@ has type '%s' unsupported by %@",
-              self, key, propertyType, self);
-    }
-    return NO;
 }
 
 @end
