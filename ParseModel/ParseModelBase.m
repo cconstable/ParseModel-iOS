@@ -6,13 +6,9 @@
 //  Created by Christopher Constable on 6/3/13.
 //  Copyright (c) 2013 Futura IO. All rights reserved.
 //
-//  Original Code:
+//  Legacy Code:
 //  Created by Jens Alfke on 8/26/11.
 //  Copyright (c) 2011 Couchbase, Inc. All rights reserved.
-//
-//  Jens Aldke wrote almost all of the code below. I simply changed
-//  a few methods to make this work with Parse. Thank him for
-//  his hard work by supporting CouchCocoa and TouchDB!
 //
 
 #import <Parse/Parse.h>
@@ -67,7 +63,7 @@
     Class declaredInClass;
     const char *propertyType;
     char signature[5];
-    IMP accessor = NULL;
+    IMP implementation = NULL;
     
     // Is this selector a setter? (e.g. setValue:)
     if (isSetter(selectorName)) {
@@ -75,7 +71,7 @@
         if (getPropertyInfo(self, key, YES, &declaredInClass, &propertyType)) {
             strcpy(signature, "v@: ");
             signature[3] = propertyType[0];
-            accessor = [self impForSetterOfProperty: key ofType: propertyType];
+            implementation = [self impForSetterOfProperty: key ofType: propertyType];
         }
     }
     
@@ -85,25 +81,23 @@
         if (getPropertyInfo(self, key, NO, &declaredInClass, &propertyType)) {
             strcpy(signature, " @:");
             signature[0] = propertyType[0];
-            accessor = [self impForGetterOfProperty: key ofType: propertyType];
+            implementation = [self impForGetterOfProperty: key ofType: propertyType];
         }
-    }
-    
-    // Neither setter nor getter... just return.
+    }    
     else {
         return NO;
     }
     
     // Create dynamic property method
-    if (accessor) {
-        class_addMethod(declaredInClass, selector, accessor, signature);
+    if (implementation) {
+        class_addMethod(declaredInClass, selector, implementation, signature);
         return YES;
     }
-    
-    if (propertyType) {
+    else {
         NSLog(@"Dynamic property %@.%@ has type '%s' unsupported by %@",
               self, key, propertyType, self);
     }
+    
     return NO;
 }
 
@@ -270,63 +264,81 @@ static Class classFromType(const char* propertyType) {
     });
 }
 
-+ (IMP)impForGetterOfProperty:(NSString*)property ofType:(const char *)propertyType {
-    switch (propertyType[0]) {
-        case _C_ID:
-            return [self impForGetterOfProperty:property ofClass:classFromType(propertyType)];
-        case _C_INT:
-        case _C_SHT:
-        case _C_USHT:
-        case _C_CHR:
-        case _C_UCHR:
-            return imp_implementationWithBlock(^int(ParseModelBase* receiver) {
-                return [[receiver getValueOfProperty: property] intValue];
-            });
-        case _C_BOOL:
-            return imp_implementationWithBlock(^bool(ParseModelBase* receiver) {
-                return [[receiver getValueOfProperty: property] boolValue];
-            });
-        case _C_DBL:
-            return imp_implementationWithBlock(^double(ParseModelBase* receiver) {
-                return [[receiver getValueOfProperty: property] doubleValue];
-            });
-        case _C_FLT:
-            return imp_implementationWithBlock(^double(ParseModelBase* receiver) {
-                return [[receiver getValueOfProperty: property] floatValue];
-            });
-        default:
-            // TODO: handle more scalar property types.
-            return NULL;
++ (IMP)impForGetterOfProperty:(NSString*)property ofType:(const char *)propertyType
+{
+    if (propertyType[0] == _C_ID) {
+        return [self impForGetterOfProperty:property ofClass:classFromType(propertyType)];
+    }
+    else if (strcmp(propertyType, @encode(BOOL)) == 0) {
+        return imp_implementationWithBlock(^BOOL(ParseModelBase* receiver) {
+            return [[receiver getValueOfProperty: property] boolValue];
+        });
+    }
+    else if ((strcmp(propertyType, @encode(int)) == 0) ||
+             (strcmp(propertyType, @encode(short int)) == 0) ||
+             (strcmp(propertyType, @encode(unsigned short)) == 0) ||
+             (strcmp(propertyType, @encode(char)) == 0) ||
+             (strcmp(propertyType, @encode(unsigned char)) == 0)) {
+        return imp_implementationWithBlock(^int(ParseModelBase* receiver) {
+            return [[receiver getValueOfProperty: property] intValue];
+        });
+    }
+    else if (strcmp(propertyType, @encode(bool)) == 0) {
+        return imp_implementationWithBlock(^bool(ParseModelBase* receiver) {
+            return [[receiver getValueOfProperty: property] boolValue];
+        });
+    }
+    else if (strcmp(propertyType, @encode(double)) == 0) {
+        return imp_implementationWithBlock(^double(ParseModelBase* receiver) {
+            return [[receiver getValueOfProperty: property] doubleValue];
+        });
+    }
+    else if (strcmp(propertyType, @encode(float)) == 0) {
+        return imp_implementationWithBlock(^float(ParseModelBase* receiver) {
+            return [[receiver getValueOfProperty: property] floatValue];
+        });
+    }
+    else {
+        return NULL;
     }
 }
 
-+ (IMP)impForSetterOfProperty:(NSString*)property ofType:(const char *)propertyType {
-    switch (propertyType[0]) {
-        case _C_ID:
-            return [self impForSetterOfProperty: property ofClass: classFromType(propertyType)];
-        case _C_INT:
-        case _C_SHT:
-        case _C_USHT:
-        case _C_CHR:            // Note that "BOOL" is a typedef so it compiles to 'char'
-        case _C_UCHR:
-            return imp_implementationWithBlock(^(ParseModelBase* receiver, int value) {
-                setIdProperty(receiver, property, [NSNumber numberWithInt: value]);
-            });
-        case _C_BOOL:           // This is the true native C99/C++ "bool" type
-            return imp_implementationWithBlock(^(ParseModelBase* receiver, bool value) {
-                setIdProperty(receiver, property, [NSNumber numberWithBool: value]);
-            });
-        case _C_DBL:
-            return imp_implementationWithBlock(^(ParseModelBase* receiver, double value) {
-                setIdProperty(receiver, property, [NSNumber numberWithDouble: value]);
-            });
-        case _C_FLT:
-            return imp_implementationWithBlock(^(ParseModelBase* receiver, float value) {
-                setIdProperty(receiver, property, [NSNumber numberWithFloat:value]);
-            });
-        default:
-            // TODO: handle more scalar property types.
-            return NULL;
++ (IMP)impForSetterOfProperty:(NSString*)property ofType:(const char *)propertyType
+{
+    if (propertyType[0] == _C_ID) {
+        return [self impForSetterOfProperty: property ofClass: classFromType(propertyType)];
+    }
+    else if (strcmp(propertyType, @encode(BOOL)) == 0) {
+        return imp_implementationWithBlock(^(ParseModelBase* receiver, BOOL value) {
+            setIdProperty(receiver, property, [NSNumber numberWithBool:value]);
+        });
+    }
+    else if ((strcmp(propertyType, @encode(int)) == 0) ||
+             (strcmp(propertyType, @encode(short int)) == 0) ||
+             (strcmp(propertyType, @encode(unsigned short)) == 0) ||
+             (strcmp(propertyType, @encode(char)) == 0) ||
+             (strcmp(propertyType, @encode(unsigned char)) == 0)) {
+        return imp_implementationWithBlock(^(ParseModelBase* receiver, int value) {
+            setIdProperty(receiver, property, [NSNumber numberWithInt: value]);
+        });
+    }
+    else if (strcmp(propertyType, @encode(bool)) == 0) {
+        return imp_implementationWithBlock(^(ParseModelBase* receiver, bool value) {
+            setIdProperty(receiver, property, [NSNumber numberWithBool:value]);
+        });
+    }
+    else if (strcmp(propertyType, @encode(double)) == 0) {
+        return imp_implementationWithBlock(^(ParseModelBase* receiver, double value) {
+            setIdProperty(receiver, property, [NSNumber numberWithDouble:value]);
+        });
+    }
+    else if (strcmp(propertyType, @encode(float)) == 0) {
+        return imp_implementationWithBlock(^(ParseModelBase* receiver, float value) {
+            setIdProperty(receiver, property, [NSNumber numberWithFloat:value]);
+        });
+    }
+    else {
+        return NULL;
     }
 }
 
