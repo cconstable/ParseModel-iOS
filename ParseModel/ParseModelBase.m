@@ -145,7 +145,7 @@ static inline void setIdProperty(ParseModelBase *self, NSString* property, id va
 
 #pragma mark - PROPERTY INTROSPECTION:
 
-+ (NSSet*) propertyNames {
++ (NSSet *) propertyNames {
     static NSMutableDictionary* classToNames;
     if (!classToNames)
         classToNames = [[NSMutableDictionary alloc] init];
@@ -203,33 +203,87 @@ static BOOL getPropertyInfo(Class cls,
                             BOOL setter,
                             Class *declaredInClass,
                             const char* *propertyType) {
-    // Find the property declaration:
     const char *name = [propertyName UTF8String];
     objc_property_t property = class_getProperty(cls, name);
     
     if (!property) {
-        if (![propertyName hasPrefix: @"primitive"]) {   // Ignore "primitiveXXX" KVC accessors
-            NSLog(@"%@ has no dynamic property named '%@' -- failure likely", cls, propertyName);
+        
+        // If we can't find the property in the class, it may be in a protocol...
+        // Though it should be in the class that conforms to the protocol, sometimes
+        // it does not appear there. This seems to be strange behavior.
+        property = checkForPropertyInProtocols(cls, name, declaredInClass);
+        
+        if (!property) {
+            if (![propertyName hasPrefix: @"primitive"]) {   // Ignore "primitiveXXX" KVC accessors
+                NSLog(@"%@ has no dynamic property named '%@' -- failure likely", cls, propertyName);
+            }
+            *propertyType = NULL;
+            return NO;
         }
-        *propertyType = NULL;
-        return NO;
+    }
+        
+    // Find the class that introduced this property, as cls may have just inherited it:
+    if (*declaredInClass == NULL) {
+        do {
+            *declaredInClass = cls;
+            cls = class_getSuperclass(cls);
+        } while (class_getProperty(cls, name) == property);
     }
     
-    // Find the class that introduced this property, as cls may have just inherited it:
-    do {
-        *declaredInClass = cls;
-        cls = class_getSuperclass(cls);
-    } while (class_getProperty(cls, name) == property);
-        
     // Get the property's type:
     BOOL isSettable;
     *propertyType = getPropertyType(property, &isSettable);
+        
     if (setter && !isSettable) {
         // Asked for a setter, but property is readonly:
         *propertyType = NULL;
         return NO;
     }
     return YES;
+}
+
+static objc_property_t checkForPropertyInProtocols(Class aClass,
+                                                   const char *propertyName,
+                                                   Class *declaredInClass)
+{
+    // For speed, check the immediate class first...
+    uint protocolCount = 0;
+    __unsafe_unretained Protocol **protocolArray = class_copyProtocolList(aClass, &protocolCount);
+    for (uint i = 0; i < protocolCount; i++) {
+        
+        uint protocolPropertyCount = 0;
+        objc_property_t *properties = protocol_copyPropertyList(protocolArray[i], &protocolPropertyCount);
+        for (uint j = 0; j < protocolPropertyCount; j++) {
+            
+            // If we found the property...
+            if (strcmp(propertyName, property_getName(properties[j])) == 0) {
+                *declaredInClass = aClass;
+                return properties[j];
+            }
+        }
+    }
+    
+    // Check super classes...
+    Class superClass = aClass;
+    while ((superClass = class_getSuperclass(superClass))) {
+        protocolCount = 0;
+        __unsafe_unretained Protocol **protocolArray = class_copyProtocolList(superClass, &protocolCount);
+        for (uint i = 0; i < protocolCount; i++) {
+            
+            uint protocolPropertyCount = 0;
+            objc_property_t *properties = protocol_copyPropertyList(protocolArray[i], &protocolPropertyCount);
+            for (uint j = 0; j < protocolPropertyCount; j++) {
+                
+                // If we found the property...
+                if (strcmp(propertyName, property_getName(properties[j])) == 0) {
+                    *declaredInClass = superClass;
+                    return properties[j];
+                }
+            }
+        }
+    }
+    
+    return NULL;
 }
 
 static Class classFromType(const char* propertyType) {
@@ -241,7 +295,7 @@ static Class classFromType(const char* propertyType) {
     return objc_getClass(className);
 }
 
-+ (Class) classOfProperty: (NSString*)propertyName {
++ (Class)classOfProperty:(NSString *)propertyName {
     Class declaredInClass;
     const char* propertyType;
     if (!getPropertyInfo(self, propertyName, NO, &declaredInClass, &propertyType))
