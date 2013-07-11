@@ -8,8 +8,16 @@
 
 #import <Parse/Parse.h>
 #import "ParseModelUser.h"
+#import "ParseModelUtils.h"
 
 @implementation ParseModelUser
+
++ (NSString *)parseModelClass
+{
+    // Default Implementation.
+    
+    return @"User";
+}
 
 + (instancetype)parseModel
 {
@@ -19,6 +27,11 @@
 + (instancetype)parseModelUserWithParseUser:(PFUser *)parseUser
 {
     return [[[self class] alloc] initWithParseUser:parseUser];
+}
+
++ (void)registerParseModelUser
+{
+    [[ParseModelUtils sharedUtilities] registerParseModelUser:self];
 }
 
 - (id)init

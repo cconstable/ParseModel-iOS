@@ -19,6 +19,11 @@
 
 + (instancetype)parseModel;
 
+/**
+ This needs to be overriden if you are going to create new models.
+ */
++ (NSString *)parseModelClass;
+
 // Override these methods to perform additional boxing/unboxing.
 - (id)performBoxingIfNecessary:(id)object;
 - (id)performUnboxingIfNecessary:(id)object targetClass:(Class)targetClass;

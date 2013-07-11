@@ -13,7 +13,8 @@
 + (instancetype)sharedUtilities;
 
 /**
- This is called by the Parse Models to register themselves.
+ This is called by the Parse Models to register themselves. You don't need to
+ manually call this.
  
  Registered Parse Models help Parse Model know what kind of class to instantiate
  when doing things like unboxing array/dictionary values from the backend.
@@ -21,6 +22,12 @@
  bad things may happen.
  */
 - (BOOL)registerParseModel:(Class)parseModelClass;
+
+/**
+ This is called by the ParseModelUsers to register themselves. You don't need to
+ manually call this.
+ */
+- (BOOL)registerParseModelUser:(Class)parseModelUserClass;
 
 // Generic boxing/unboxing methods.
 - (id)performBoxingIfNecessary:(id)object;

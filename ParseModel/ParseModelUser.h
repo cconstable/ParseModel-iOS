@@ -16,6 +16,12 @@
 
 + (instancetype)parseModelUserWithParseUser:(PFUser *)parseUser;
 
+/**
+ This registers this particular ParseModelUser class to be instantiated
+ whenever we come across a PFUser object.
+ */
++ (void)registerParseModelUser;
+
 - (id)initWithParseUser:(PFUser *)parseUser;
 
 @end

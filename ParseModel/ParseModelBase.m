@@ -30,6 +30,11 @@
     return nil;
 }
 
++ (NSString *)parseModelClass
+{
+    return @"";
+}
+
 - (id)getValueOfProperty:(NSString *)property
 {
     // Default Implementation.

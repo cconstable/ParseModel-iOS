@@ -14,6 +14,8 @@
 
 @interface ParseModelUtils ()
 @property (nonatomic, strong) NSMutableDictionary *registeredParseModels;
+@property (nonatomic, strong) NSMutableDictionary *registeredParseUsers;
+@property (nonatomic, strong) Class defaultParseModelUser;
 @end
 
 @implementation ParseModelUtils
@@ -48,6 +50,21 @@
                                    forKey:[parseModelClass parseModelClass]];
     
     return YES;
+}
+
+- (BOOL)registerParseModelUser:(Class)parseModelUserClass
+{
+    if ([parseModelUserClass isSubclassOfClass:[ParseModelUser class]] == NO) {
+        return NO;
+    }
+    
+    if (!self.registeredParseUsers) {
+        self.registeredParseUsers = [[NSMutableDictionary alloc] init];
+    }
+    
+    [self.registeredParseUsers setObject:NSStringFromClass(parseModelUserClass)
+                                  forKey:[parseModelUserClass parseModelClass]];
+    
 }
 
 - (id)performBoxingIfNecessary:(id)object
@@ -100,12 +117,12 @@
     else if((targetClass == [NSURL class]) && [object isKindOfClass:[NSString class]]) {
         unboxedObject = [NSURL URLWithString:object];
     }
-    else if (([targetClass isSubclassOfClass:[ParseModel class]]) && [object isKindOfClass:[PFObject class]]) {
-        unboxedObject = [((ParseModel *)[targetClass alloc]) initWithParseObject:object];
-    }
-    else if (([targetClass isSubclassOfClass:[ParseModelUser class]]) && [object isKindOfClass:[PFUser class]]) {
-        unboxedObject = [((ParseModelUser *)[targetClass alloc]) initWithParseUser:object];
-    }
+//    else if (([targetClass isSubclassOfClass:[ParseModel class]]) && [object isKindOfClass:[PFObject class]]) {
+//        unboxedObject = [((ParseModel *)[targetClass alloc]) initWithParseObject:object];
+//    }
+//    else if (([targetClass isSubclassOfClass:[ParseModelUser class]]) && [object isKindOfClass:[PFUser class]]) {
+//        unboxedObject = [((ParseModelUser *)[targetClass alloc]) initWithParseUser:object];
+//    }
     
     // Let's get recursive
     // Handle arrays and dictionaries...
@@ -130,11 +147,17 @@
         unboxedObject = unboxedDictionary;
     }
     
-    // Lastly, if this class is a PFObject and it is registered, instantiate the appropriate ParseModel...
+    // Lastly, if this class is a PFObject or PFUser and it is registered, instantiate the appropriate ParseModel...
     else if ([object isKindOfClass:[PFObject class]]) {
         NSString *unboxedClassString = [self.registeredParseModels objectForKey:[(PFObject *)object parseClassName]];
         if (unboxedClassString.length) {
             unboxedObject = [[NSClassFromString(unboxedClassString) alloc] initWithParseObject:object];
+        }
+    }
+    else if ([object isKindOfClass:[PFUser class]]) {
+        NSString *unboxedClassString = [self.registeredParseUsers objectForKey:[(PFUser *)object parseClassName]];
+        if (unboxedClassString.length) {
+            unboxedObject = [[NSClassFromString(unboxedClassString) alloc] initWithParseUser:object];
         }
     }
     
@@ -145,6 +168,10 @@
 {
     if ([object isKindOfClass:[PFObject class]]) {
         NSString *classString = [self.registeredParseModels objectForKey:[(PFObject *)object parseClassName]];
+        return NSClassFromString(classString);
+    }
+    else if ([object isKindOfClass:[PFUser class]]) {
+        NSString *classString = [self.registeredParseUsers objectForKey:[(PFUser *)object parseClassName]];
         return NSClassFromString(classString);
     }
     else {

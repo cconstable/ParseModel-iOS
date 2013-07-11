@@ -16,9 +16,6 @@
 
 @property (nonatomic, strong) PFObject *parseObject;
 
-/** This needs to be overriden if you are going to create new models. */
-+ (NSString *)parseModelClass;
-
 + (void)registerParseModel;
 
 + (instancetype)parseModelWithParseObject:(PFObject *)parseObject;
