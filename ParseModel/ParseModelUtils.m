@@ -117,12 +117,6 @@
     else if((targetClass == [NSURL class]) && [object isKindOfClass:[NSString class]]) {
         unboxedObject = [NSURL URLWithString:object];
     }
-//    else if (([targetClass isSubclassOfClass:[ParseModel class]]) && [object isKindOfClass:[PFObject class]]) {
-//        unboxedObject = [((ParseModel *)[targetClass alloc]) initWithParseObject:object];
-//    }
-//    else if (([targetClass isSubclassOfClass:[ParseModelUser class]]) && [object isKindOfClass:[PFUser class]]) {
-//        unboxedObject = [((ParseModelUser *)[targetClass alloc]) initWithParseUser:object];
-//    }
     
     // Let's get recursive
     // Handle arrays and dictionaries...
