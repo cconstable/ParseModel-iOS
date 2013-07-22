@@ -119,10 +119,10 @@ ParseModel currently works with all types that `PFObject` [supports](https://par
 
 ## How does this work?
 
-First off, let me say that this probably wouldn't have happened if it wasn't for [Jens Alfke](https://github.com/snej). He wrote almost all of this code. I simply adapted it for Parse. Most of the code was pulled from his CouchModel class.
-
 Under the hood, when a property is accessed that has not been created (because of the `dynamic` keyword in our case), we catch a last-ditch message to our class that says: "Hey, we couldn't find this instance method". If we can detect that it is a setter or getter method for a property that was declared as dynamic, we then create the getter/setter on the fly using a pre-defined block of code that uses a `PFObject` to store/retrieve the values. That's the gist. Check out [Dynamic Method Resolution](https://developer.apple.com/library/ios/#documentation/cocoa/conceptual/ObjCRuntimeGuide/Articles/ocrtDynamicResolution.html) for more information.
+
+Big thanks to [Jens Alfke](https://github.com/snej) who wrote CouchModel which was a starting point for this.
 
 ## License
 
-The original code Jens wrote was released under the [Apache license, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+[Apache license, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
