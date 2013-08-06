@@ -109,6 +109,11 @@
 
 - (id)performUnboxingIfNecessary:(id)object targetClass:(Class)targetClass
 {
+    // Check for NSNull and destroy it. Sorry.
+    if (targetClass == [NSNull class]) {
+        return nil;
+    }
+    
     id unboxedObject = object;
     
     if ((targetClass == [CLLocation class]) && [object isKindOfClass:[PFGeoPoint class]]) {
@@ -153,6 +158,11 @@
         if (unboxedClassString.length) {
             unboxedObject = [[NSClassFromString(unboxedClassString) alloc] initWithParseUser:object];
         }
+    }
+    
+    // Check for NSNull and destroy it. Sorry.
+    if ([unboxedObject class] == [NSNull class]) {
+        unboxedObject = nil;
     }
     
     return unboxedObject;
