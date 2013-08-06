@@ -342,6 +342,11 @@ static Class classFromType(const char* propertyType) {
             return [[receiver getValueOfProperty: property] intValue];
         });
     }
+    else if (strcmp(propertyType, @encode(unsigned int)) == 0) {
+        return imp_implementationWithBlock(^unsigned int(ParseModelBase* receiver) {
+            return [[receiver getValueOfProperty: property] unsignedIntValue];
+        });
+    }
     else if (strcmp(propertyType, @encode(bool)) == 0) {
         return imp_implementationWithBlock(^bool(ParseModelBase* receiver) {
             return [[receiver getValueOfProperty: property] boolValue];
@@ -379,6 +384,11 @@ static Class classFromType(const char* propertyType) {
              (strcmp(propertyType, @encode(unsigned char)) == 0)) {
         return imp_implementationWithBlock(^(ParseModelBase* receiver, int value) {
             setIdProperty(receiver, property, [NSNumber numberWithInt: value]);
+        });
+    }
+    else if (strcmp(propertyType, @encode(unsigned int)) == 0) {
+        return imp_implementationWithBlock(^(ParseModelBase* receiver, unsigned int value) {
+            setIdProperty(receiver, property, [NSNumber numberWithUnsignedInt:value]);
         });
     }
     else if (strcmp(propertyType, @encode(bool)) == 0) {
