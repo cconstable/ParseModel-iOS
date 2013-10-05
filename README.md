@@ -3,15 +3,13 @@ ParseModel-iOS
 
 Hassel-free data models for the Parse iOS SDK.
 
-The `ParseModel` class automatically maps the properties of your subclass to entries in an underlying `PFObject` and handles any neccesary conversions (e.g. if your property is an `int` it is converted to an `NSNumber` for storage).
+The `ParseModel` class automatically maps the properties of your subclass to key/value entries in an underlying `PFObject` and handles any neccesary conversions (e.g. if your property is an `int` it is converted to an `NSNumber` for storage).
+
+ParseModel provides some additional conversions (boxing/unboxing) that the Parse iOS SDK does not support (e.g. `NSURL` and `CLLocation`). Additionally, it provides the ability to wrap `PFUser` objects.
 
 #### Installation
 
 via [CocoaPods](http://cocoapods.org/): `pod 'ParseModel'`
-
-#### NOTE
-
-Although the Parse iOS SDK has this functionality [built in](http://blog.parse.com/2013/03/22/stay-classy-objective-c-introducing-native-subclasses-for-parse-objects/), this library acts as an alternative method to subclassing `PFObject` directly. As far as I'm aware, ParseModel handles everything that the native SDK does with the addition of being able to use this technique with `PFUser` objects and with the exception of handling relationships (it's easy enough to write a simple getter method to handle a relationship but it would be nice if someone contributed that piece).
 
 ## Why ParseModel?
 
@@ -115,7 +113,8 @@ A `PFUser` flavored object is also available called `ParseModelUser`.
  
 ## Limitations
 
-ParseModel currently works with all types that `PFObject` [supports](https://parse.com/docs/ios_guide#objects-types/iOS). This means don't try using a UIImage and expect it to work! If you need to store UIImage data (or something that is unsupported) you have a few alternatives:
+* ParseModel currently works with all types that `PFObject` [supports](https://parse.com/docs/ios_guide#objects-types/iOS). This means don't try using a UIImage and expect it to work!
+* ParseModel does not support automatically creating models from `PFQuery` objects. However, it only takes one line of code to create a ParseModel after a query.
 
 ## How does this work?
 
