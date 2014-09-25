@@ -16,7 +16,7 @@
 {
     // Default Implementation.
     
-    return @"User";
+    return @"_User";
 }
 
 + (instancetype)parseModel
