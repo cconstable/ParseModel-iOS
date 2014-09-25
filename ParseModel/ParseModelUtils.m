@@ -146,19 +146,20 @@
         unboxedObject = unboxedDictionary;
     }
     
-    // Lastly, if this class is a PFObject or PFUser and it is registered, instantiate the appropriate ParseModel...
-    else if ([object isKindOfClass:[PFObject class]]) {
-        NSString *unboxedClassString = [self.registeredParseModels objectForKey:[(PFObject *)object parseClassName]];
-        if (unboxedClassString.length) {
-            unboxedObject = [[NSClassFromString(unboxedClassString) alloc] initWithParseObject:object];
-        }
-    }
+    // Lastly, if this class is a PFUser or PFObject (checking in that order) and it is registered, instantiate the appropriate ParseModel...
     else if ([object isKindOfClass:[PFUser class]]) {
         NSString *unboxedClassString = [self.registeredParseUsers objectForKey:[(PFUser *)object parseClassName]];
         if (unboxedClassString.length) {
             unboxedObject = [[NSClassFromString(unboxedClassString) alloc] initWithParseUser:object];
         }
     }
+    else if ([object isKindOfClass:[PFObject class]]) {
+        NSString *unboxedClassString = [self.registeredParseModels objectForKey:[(PFObject *)object parseClassName]];
+        if (unboxedClassString.length) {
+            unboxedObject = [[NSClassFromString(unboxedClassString) alloc] initWithParseObject:object];
+        }
+    }
+
     
     // Check for NSNull and destroy it. Sorry.
     if ([unboxedObject class] == [NSNull class]) {
